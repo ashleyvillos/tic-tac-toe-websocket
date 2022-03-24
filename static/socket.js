@@ -1,17 +1,55 @@
-// THIS IS CLIENT
+
 
 var socket = io('http://localhost:3000');
 
-// socket.emit('connecting', {'sample_object' : 1, 'element2' : 'sample value'})
-
-// socket.on('connection confirmation', function(msg){
-//     // console.log(msg)
-//     alert(msg)
-// }) 
 
 socket.on('connected', function(){
     // alert('Connected to Server')
 })
+
+socket.on('message', function(payload) {
+    alert(payload)
+})
+
+socket.on('broadcast', function(payload) {
+    alert(payload)
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 socket.on('move', function(msg){
     flag = msg['flag']
