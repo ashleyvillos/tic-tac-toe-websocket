@@ -25,7 +25,7 @@ io.on('connection', function(socket) {
     // socket.emit('connection confirmation', 'Naka connect na ka')
 
     // broadcast
-    // socket.broadcast.emit('connection confirmation', "Someone connected to the server")
+    socket.broadcast.emit('connection confirmation', "Someone connected to the server")
     socket.emit('connected')
     socket.on('move', function(msg){
         socket.broadcast.emit('move', msg)
