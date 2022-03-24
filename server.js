@@ -9,8 +9,13 @@ app.use(express.static('static'))
 
 // POST, GET
 app.get('/', (req, res) => {
-    res.sendFile(__dirname + '/static/index.html');
+    // res.sendFile(__dirname + '/static/index.html');
+    res.sendFile(__dirname + '/static/game.html');
 });
+
+// app.get('/game', (req, res) => {
+//     res.sendFile(__dirname + '/static/game.html');
+// })
 
 server.listen(3000, function() {
     console.log('listening on *:3000');
@@ -18,6 +23,7 @@ server.listen(3000, function() {
 
 
 let websocket_connections = {} // {socket id : socket object, socket id 2 : socket object 2, socket id 3 : socket object 3}
+let servers = []
 
 // THIS IS SERVER
 io.on('connection', function(socket) {
@@ -44,7 +50,48 @@ io.on('connection', function(socket) {
     })
 
 
+    socket.on('create-server', function() {
+        servers.push({
+            name : socket.id,
+            participants : [socket]
+        })
 
+        socket.emit('create-server-response', {name : socket.id})
+    })
+
+    socket.on('join-server', function() {
+        let joined = false
+        
+        for (let i = 0; i < servers.length; i++) {
+
+            if (servers[i].participants.length == 1) {
+                servers[i].participants.push(socket)
+                socket.emit('join-server-response', {name : servers[i].name, joined : true})
+                joined = true
+                break
+            }
+        }
+
+        if (!joined) {
+            socket.emit('join-server-response', {joined : false})   
+        }
+    })
+
+
+
+    // let arr_object = ["one", "two", "three", "four"]
+
+    // for (let i = 0; i < arr_object.length; i++) {
+    //     console.log(arr_object[i])
+    // }
+
+    // for (const index in arr_object) {
+    //     console.log(arr_object[index])
+    // }
+
+    // for (const arr of arr_object) {
+    //     console.log(arr)
+    // }
 
 
     // socket.on('connecting', function(msg){
@@ -56,8 +103,19 @@ io.on('connection', function(socket) {
     // broadcast
     // socket.broadcast.emit('connection confirmation', "Someone connected to the server")
     socket.emit('connected')
-    socket.on('move', function(msg){
-        socket.broadcast.emit('move', msg)
+
+    socket.on('move', function(payload){
+        let server_name = payload.server_name
+
+        for (let i = 0; i < servers.length; i++) {
+
+            if (servers[i].name == server_name) {
+                
+                for (let j = 0; j < servers[i].participants.length; j++) {
+                    servers[i].participants[j].emit('move', payload)
+                }
+            }
+        }
     })
 })
 
